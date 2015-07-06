@@ -1,0 +1,22 @@
+
+syntax = "proto3";
+
+package hystrix;
+
+option java_package = "com.glonk.grpc.hystrix.model";
+option java_multiple_files = true;
+option java_outer_classname = "Hystrix";
+
+service DummyService {
+    rpc Unary (UnaryRequest) returns (UnaryResponse) {}
+}
+
+message UnaryRequest {
+    int32 code = 1;
+}
+
+message UnaryResponse {
+    int32 code = 1;
+}
+
+
