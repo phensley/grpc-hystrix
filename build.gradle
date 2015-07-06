@@ -1,0 +1,77 @@
+
+plugins {
+  id 'com.google.protobuf' version '0.4.1'
+}
+
+repositories {
+  mavenCentral()
+}
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+group = 'com.glonk.grpc.hystrix'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+project.ext {
+  grpcVersion = '0.7.1'
+  hystrixVersion = '1.4.12'
+  mockitoVersion = '1.10.19'
+  protobufVersion = '3.0.0-alpha-3'
+  testngVersion = '6.9.4'
+
+  generatedTestDir = "${buildDir}/generated-sources/test"
+}
+
+sourceSets {
+  test {
+    proto {
+      plugins {
+        grpc { }
+      }
+    }
+    java {
+      srcDirs = ["src/test/java", generatedTestDir]
+    }
+  }
+}
+
+javadoc {
+  exclude '**/generated-sources/**'
+  options.encoding = 'UTF-8'
+}
+
+eclipse {
+  classpath {
+    downloadSources = true
+    downloadJavadoc = true
+  }
+}
+
+protocDep = "com.google.protobuf:protoc:${protobufVersion}"
+protobufNativeCodeGenPluginDeps = ["grpc:io.grpc:protoc-gen-grpc-java:${grpcVersion}"]
+
+tasks.eclipse.dependsOn 'generateTestProto'
+
+task deleteGeneratedSource << {
+  project.delete project.fileTree(dir: generatedTestDir)
+}
+
+project.afterEvaluate {
+  generateTestProto.inputs.file "${projectDir}/build.gradle"
+  generateTestProto.dependsOn deleteGeneratedSource
+}
+
+dependencies {
+  compile "com.google.protobuf:protobuf-java:${protobufVersion}"
+  compile "io.grpc:grpc-core:${grpcVersion}"
+  compile "io.grpc:grpc-stub:${grpcVersion}"
+  compile "io.grpc:grpc-protobuf:${grpcVersion}"
+  compile "com.netflix.hystrix:hystrix-core:${hystrixVersion}"
+
+  testCompile "org.testng:testng:${testngVersion}"
+  testCompile "org.mockito:mockito-core:${mockitoVersion}"
+}
+
